@@ -1,4 +1,25 @@
-# Matrix Synapse with Keycloak SSO Integration Guide
+# Matrix Synapse with Keycloak SSO
+
+A small Docker setup for trying **single sign-on on a Matrix homeserver**: Synapse as the
+homeserver, Keycloak as the identity provider (OpenID Connect) and Element Web as the client.
+You log in to Element with a Keycloak account instead of a Matrix password.
+
+| Service | Image | Local address |
+| --- | --- | --- |
+| Synapse (homeserver) | `matrixdotorg/synapse` | <http://localhost:8008> |
+| Keycloak (SSO) | `quay.io/keycloak/keycloak` | <http://localhost:8085> |
+| Element Web (client) | `vectorim/element-web` | <http://localhost:8081> |
+
+> [!WARNING]
+> This is a **local test setup, not a production one**. Keycloak runs in `start-dev` mode with
+> the default `admin` / `admin` login, and the OIDC settings allow insecure HTTP and skip
+> verification. Change all of that before exposing anything to a network.
+
+## What is in this repository
+
+- `docker-compose.yml` starts Keycloak and Element Web.
+- `homeserver.yaml` is an example Synapse configuration with the Keycloak OIDC provider.
+- `config.json` is the Element Web configuration pointing at the local homeserver.
 
 ## Prerequisites
 
@@ -59,7 +80,7 @@ oidc_providers:
     skip_verification: true
     issuer: "http://host.docker.internal:8080/realms/master"
     client_id: "synapse"
-    client_secret: "sRLeczfbwWE59rb0DXIBmnD2BYuoe6OG"
+    client_secret: "<your-client-secret>"
     scopes: ["openid", "profile", "email"]
     user_mapping_provider:
       config:
@@ -73,7 +94,8 @@ oidc_providers:
 1. Create a new realm named "synapse"
 2. Create a client with these settings:
    - Client ID: `synapse`
-   - Client Secret: `sRLeczfbwWE59rb0DXIBmnD2BYuoe6OG`
+   - Client Secret: copy it from the client's **Credentials** tab in Keycloak and put it in
+     `homeserver.yaml` as `client_secret`
    - Issuer URL: `http://host.docker.internal:8080/realms/master`
 
 ## Troubleshooting
